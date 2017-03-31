@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <meta charset=UTF-8>
+    <title>Страница</title>
+    <style type=text/css>
+    html,
+    body {
+        height: 100%;
+    }
+    
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column; 
+    }
+    .button{
+    	background-color: #3b9272;
+    	border-radius: 3px;
+    	border-width: 0;
+    	width: 10em;
+    	height: 2.4em;
+    	color: #fff;
+    	font-family: monospace;
+    	font-weight: 700;
+    }
+    .save{
+		background-color: #3b5e92;
+    }
+    .restorans-text-area{
+
+    	min-width: 960px
+    }
+    </style>
+</head>
+
+<body>
+	<div><textarea class="restorans-text-area" id="restorans" type="text" name="restorans"></textarea> </div>
+    <h1>Пока ничего не выбрано</h1>
+	<div>
+		<input type="submit" name="randomyze" id="press" class="button" value="Выбрать">
+	<input type="submit" name="save" id="save" class="button save" value="Сохранить">
+
+	</div>
+    <script type="text/javascript" src='./node_modules/jquery/dist/jquery.min.js'></script>
+    <script type=text/javascript>
+   		const restorans = ['Максимовича', 'Фонтан', 'Винница', 'Арабская кухня', 'Арабская кухня', 'Паб', 'Вареники/Пельмени', 'Пицца'];
+   		$('#restorans').val(`${restorans.join(', ')}`);
+
+   		function choiseRestoran(){
+   			const number = Math.floor(Math.random() * (($('#restorans').val().split(', ').length-1) - 0 + 1)) + 0;
+   			return $('#restorans').val().split(', ')[number]
+   		}
+    	$('#press').on('click', ()=>{
+    		$('h1').text(choiseRestoran());
+    	});
+    	$('#save').on('click', ()=>{
+    		const sendData =  $('#restorans').val();
+    		console.log(sendData);
+    		$.get("update", { message: sendData }, (data, status) => {
+        		console.log(data, status);
+    		})
+    	});
+    	$(document).ready(function(){
+    
+			$.get("restorans", (data, status) => {
+        		console.log(data, status);
+        		$('#restorans').val(JSON.parse(data).join(', ')  );
+    		});
+
+		});
+    </script>
+</body>
+
+</html>
