@@ -33,6 +33,18 @@
 
     	min-width: 960px
     }
+    .history > h2 {
+    	color:#999;
+    }
+    .history > ul > li {
+    	color:#999;
+    	list-style-type: upper-roman;
+    }
+    .history {
+    	position: absolute;
+    	top:0;
+    	right:130px;
+    }
     </style>
 </head>
 
@@ -44,18 +56,35 @@
 	<input type="submit" name="save" id="save" class="button save" value="Сохранить">
 
 	</div>
+	<div class="history">
+		<h2>History</h2>
+		<ul>
+			
+		</ul>
+	</div>
     <script type="text/javascript" src='./node_modules/jquery/dist/jquery.min.js'></script>
+
     <script type=text/javascript>
-   		const restorans = ['Максимовича', 'Фонтан', 'Винница', 'Арабская кухня', 'Арабская кухня', 'Паб', 'Вареники/Пельмени', 'Пицца'];
-   		$('#restorans').val(`${restorans.join(', ')}`);
+   		$.getJSON('https://api.ipify.org?format=json', function(data){
+    		console.log('Your ip is =>',data.ip);
+    		ip = data.ip;
+		});
 
    		function choiseRestoran(){
    			const number = Math.floor(Math.random() * (($('#restorans').val().split(', ').length-1) - 0 + 1)) + 0;
    			return $('#restorans').val().split(', ')[number]
    		}
+   		// choise
     	$('#press').on('click', ()=>{
     		$('h1').text(choiseRestoran());
+    		$('.history > ul').append('<li>'+choiseRestoran()+'; ip : '+ ip +'</li>');
+
+    		$.get("history", { message: choiseRestoran()+'; ip : '+ ip }, (data, status) => {
+        		console.log(data, status);
+    		})
     	});
+
+    	//save 
     	$('#save').on('click', ()=>{
     		const sendData =  $('#restorans').val();
     		console.log(sendData);
@@ -63,15 +92,24 @@
         		console.log(data, status);
     		})
     	});
+
+    	//get index
     	$(document).ready(function(){
     
 			$.get("restorans", (data, status) => {
         		console.log(data, status);
-        		$('#restorans').val(JSON.parse(data).join(', ')  );
+        		const dataX = JSON.parse(data)
+        		$('#restorans').val(dataX.data.join(', ')  );
+        		//$('.history > ul').each(JSON.parse(data.history) );
+        		dataX.history.forEach((item)=>{
+        			$('.history > ul').append("<li>"+item+"</li>");
+        		});
     		});
 
 		});
+
     </script>
+
 </body>
 
 </html>

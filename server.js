@@ -8,7 +8,7 @@ const db = require('diskdb');
 const public = new static.Server('./public');
 
 
-db.connect('db', ['restorans', 'start']);
+db.connect('db', ['restorans', 'start', 'history']);
 
 
 
@@ -22,16 +22,24 @@ const server = new http.Server((req, res) => {
 	 if(urlParse.pathname == '/update' && urlParse.query.message){
 	 	console.log(urlParse.query.message);
 	 	db.start.save(db.restorans.find().length);
-		db.restorans.save([urlParse.query.message.split(', ')]);
+		db.restorans.save([urlParse.query.message.split(', ').reverse()]);
 		res.statusCode = 200;
 		res.end();
 	 }
 	 //get from db
 	 if(urlParse.pathname == '/restorans'){
-	 	const result = db.restorans.find().slice(db.start.find()[db.start.find().length - 1]||0)
+	 	const result = {data: db.restorans.find().slice(db.start.find()[db.start.find().length - 1]||0), history:db.history.find()}
 	 	console.log(result, db.start.find());
 	 	res.statusCode = 200;
 		res.end(JSON.stringify(result) );
+	 }
+
+	 if(urlParse.pathname == '/history' && urlParse.query.message){
+		console.log(urlParse.query.message);
+		db.history.save(urlParse.query.message);
+	 	res.statusCode = 200;
+	 	const result = db.history.find();
+	 	res.end(urlParse.query.message + 'is add from db.');
 	 }
 })
 
