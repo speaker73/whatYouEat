@@ -14,7 +14,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        flex-direction: column; 
+        flex-direction: column;
+        overflow-y: hidden; 
     }
     .button{
     	background-color: #3b9272;
@@ -30,8 +31,13 @@
 		background-color: #3b5e92;
     }
     .restorans-text-area{
-
-    	min-width: 960px
+		min-width: 960px;
+		border-radius: 15px;
+		padding: 5px 20px; 
+    }
+    .restorans-text-area:focus{
+    	outline: rgb(229, 151, 0);
+    	box-shadow: rgba(0, 0, 0, 0.17) 0 0 16px;
     }
     .history > h2 {
     	color:#999;
@@ -39,31 +45,59 @@
     .history > ul > li {
     	color:#999;
     	list-style-type: upper-roman;
+    	margin: 20px 0;
+    }
+    .history > ul > li > div{
+    	display: flex;
+    	flex:1;
+    	justify-content: space-between;
+    	align-items: flex-start;
+    	margin-top: -18px;
+    }
+    .history > ul > li > div > span {
+    	padding: 0 5px;
     }
     .history {
     	position: absolute;
     	top:0;
-    	right:130px;
+    	right:0;
+    	background-color: white;
+    	box-shadow: rgba(0, 0, 0, 0.17) 0 0 16px;
+    	padding: 10px 5%;
+    	overflow-y: scroll;
+    	height: 100%;
+    	display: flex;
+    	
+    	align-items: center;
+    	flex-direction: column;
+    }
+    .clear{
+    	background-color: rgba(103, 58, 183, 0.59);
+    	margin-bottom: 40px;
     }
     </style>
 </head>
 
 <body>
-	<div><textarea class="restorans-text-area" id="restorans" type="text" name="restorans"></textarea> </div>
+	<div><input class="restorans-text-area" id="restorans" type="text" name="restorans" value> </div>
     <h1>Пока ничего не выбрано</h1>
 	<div>
 		<input type="submit" name="randomyze" id="press" class="button" value="Выбрать">
-	<input type="submit" name="save" id="save" class="button save" value="Сохранить">
+		<input type="submit" name="save" id="save" class="button save" value="Сохранить">
 
 	</div>
 	<div class="history">
-		<h2>History</h2>
-		<ul>
+		<h2>История</h2>
+		<div>
+			<input type="submit" name="clear" id="clear" class="button clear" value="Показать">
+
+		</div>		
+		<ul style="display: none">
 			
 		</ul>
 	</div>
     <script type="text/javascript" src='./node_modules/jquery/dist/jquery.min.js'></script>
-
+	<script type="text/javascript" src="./node_modules/moment/min/moment.min.js"></script>
     <script type=text/javascript>
    		$.getJSON('https://api.ipify.org?format=json', function(data){
     		console.log('Your ip is =>',data.ip);
@@ -77,9 +111,14 @@
    		// choise
     	$('#press').on('click', ()=>{
     		$('h1').text(choiseRestoran());
-    		$('.history > ul').append('<li>'+choiseRestoran()+'; ip : '+ ip +'</li>');
-
-    		$.get("history", { message: choiseRestoran()+'; ip : '+ ip }, (data, status) => {
+    		const date = moment().format('HH:MM:SS (DD.MM.YY)');
+    		$('.history > ul').append("<li>"+choiseRestoran()+"<span> "+date+"</span></li>");
+    		const message = {message:JSON.stringify({
+    						choise:choiseRestoran(), 
+    						ip : ip, 
+    						date: date
+    					})};
+    		$.get("history", message, (data, status) => {
         		console.log(data, status);
     		})
     	});
@@ -92,7 +131,21 @@
         		console.log(data, status);
     		})
     	});
-
+    	//clear history
+    	$('#clear').on('click', ()=>{
+    		if($('#clear').val() == 'Спрятать'){
+				$('.history > ul').css('display', 'none');
+				$('#clear').val('Показать');
+    		}else{
+    			$('.history > ul').css('display', 'block');
+				$('#clear').val('Спрятать');
+    		}
+    		
+    		console.log('clear is press')
+    		$.get("clear", { message:'history' }, (data, status) => {
+        		console.log(data, status);
+    		})
+    	});
     	//get index
     	$(document).ready(function(){
     
@@ -101,8 +154,9 @@
         		const dataX = JSON.parse(data)
         		$('#restorans').val(dataX.data.join(', ')  );
         		//$('.history > ul').each(JSON.parse(data.history) );
+        		
         		dataX.history.forEach((item)=>{
-        			$('.history > ul').append("<li>"+item+"</li>");
+        			$('.history > ul').append("<li><div><span>"+item.choise+"</span><span> "+item.date+"</span></div></li>");
         		});
     		});
 

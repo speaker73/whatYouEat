@@ -21,25 +21,30 @@ const server = new http.Server((req, res) => {
      //update from db
 	 if(urlParse.pathname == '/update' && urlParse.query.message){
 	 	console.log(urlParse.query.message);
-	 	db.start.save(db.restorans.find().length);
-		db.restorans.save([urlParse.query.message.split(', ').reverse()]);
+	 	//db.start.save({restorans:[db.restorans.find().length]});
+		db.restorans.save({restorans: urlParse.query.message.split(', ')});
 		res.statusCode = 200;
 		res.end();
 	 }
 	 //get from db
 	 if(urlParse.pathname == '/restorans'){
-	 	const result = {data: db.restorans.find().slice(db.start.find()[db.start.find().length - 1]||0), history:db.history.find()}
-	 	console.log(result, db.start.find());
+	 	const result = {data: db.restorans.find()[db.restorans.find().length - 1].restorans , history:db.history.find()}
 	 	res.statusCode = 200;
 		res.end(JSON.stringify(result) );
 	 }
-
+	 
+	//update history
 	 if(urlParse.pathname == '/history' && urlParse.query.message){
 		console.log(urlParse.query.message);
-		db.history.save(urlParse.query.message);
+		db.history.save(JSON.parse(urlParse.query.message) );
 	 	res.statusCode = 200;
 	 	const result = db.history.find();
 	 	res.end(urlParse.query.message + 'is add from db.');
+	 }
+	//clear hostory
+    if(urlParse.pathname == '/clear'){
+	 	res.statusCode = 200;
+		res.end();
 	 }
 })
 
