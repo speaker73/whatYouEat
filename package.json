@@ -12,6 +12,7 @@
     "diskdb": "^0.1.17",
     "filebase": "0.0.1",
     "http": "0.0.0",
-    "node-static": "^0.7.9"
+    "node-static": "^0.7.9",
+    "request": "^2.81.0"
   }
 }

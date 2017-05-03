@@ -80,11 +80,12 @@
 
 <body>
 	<div><input class="restorans-text-area" id="restorans" type="text" name="restorans" value> </div>
-    <h1>Пока ничего не выбрано</h1>
+    <a id="h1"><h1>Пока ничего не выбрано</h1></a>
 	<div>
 		<input type="submit" name="randomyze" id="press" class="button" value="Выбрать">
 		<input type="submit" name="save" id="save" class="button save" value="Сохранить">
-
+		<input type="submit" name="change" id="change" class="button" value="GEO">
+		
 	</div>
 	<div class="history">
 		<h2>История</h2>
@@ -96,9 +97,15 @@
 			
 		</ul>
 	</div>
+
+	
+
     <script type="text/javascript" src='./node_modules/jquery/dist/jquery.min.js'></script>
 	<script type="text/javascript" src="./node_modules/moment/min/moment.min.js"></script>
+	
+
     <script type=text/javascript>
+    let uData = '';
    		$.getJSON('https://api.ipify.org?format=json', function(data){
     		console.log('Your ip is =>',data.ip);
     		ip = data.ip;
@@ -108,9 +115,27 @@
    			const number = Math.floor(Math.random() * (($('#restorans').val().split(', ').length-1) - 0 + 1)) + 0;
    			return $('#restorans').val().split(', ')[number]
    		}
+   		//change
+   		$('#change').on('click', ()=>{
+   			$('#restorans').val('');
+   			let count = 0;
+   			uData.results.forEach((object)=>{
+   				const val = $('#restorans').val();
+   				count++;
+   				if(uData.results.length == count){
+					$('#restorans').val(val + object.name);
+   				}else{
+   					$('#restorans').val(val + object.name+', ');
+   				}
+   				
+   			})
+   		});
    		// choise
     	$('#press').on('click', ()=>{
-    		$('h1').text(choiseRestoran());
+    		const rest = choiseRestoran();
+    		const cordin = uData.results.find((obj)=>{return obj.name == rest.trim() })
+    		$('h1').text(rest);
+    		$('#h1').attr('href', 'https://www.google.com.ua/maps/place/' + cordin.vicinity );
     		const date = moment().format('HH:MM:SS (DD.MM.YY)');
     		$('.history > ul').append("<li>"+choiseRestoran()+"<span> "+date+"</span></li>");
     		const message = {message:JSON.stringify({
@@ -119,16 +144,16 @@
     						date: date
     					})};
     		$.get("history", message, (data, status) => {
-        		console.log(data, status);
+        		//console.log(data, status);
     		})
     	});
 
     	//save 
     	$('#save').on('click', ()=>{
     		const sendData =  $('#restorans').val();
-    		console.log(sendData);
+    		//console.log(sendData);
     		$.get("update", { message: sendData }, (data, status) => {
-        		console.log(data, status);
+        		//console.log(data, status);
     		})
     	});
     	//clear history
@@ -143,14 +168,14 @@
     		
     		console.log('clear is press')
     		$.get("clear", { message:'history' }, (data, status) => {
-        		console.log(data, status);
+        		//console.log(data, status);
     		})
     	});
     	//get index
     	$(document).ready(function(){
     
 			$.get("restorans", (data, status) => {
-        		console.log(data, status);
+        		console.log(JSON.parse(data), status);
         		const dataX = JSON.parse(data)
         		$('#restorans').val(dataX.data.join(', ')  );
         		//$('.history > ul').each(JSON.parse(data.history) );
@@ -159,11 +184,21 @@
         			$('.history > ul').append("<li><div><span>"+item.choise+"</span><span> "+item.date+"</span></div></li>");
         		});
     		});
+			$.get("gApi", (data, status) => {
+				uData = JSON.parse( JSON.parse(data)[0].body );
 
+				console.log("gApi", uData);
+				
+
+			});
+	
 		});
+
+
 
     </script>
 
+	
 </body>
 
 </html>
